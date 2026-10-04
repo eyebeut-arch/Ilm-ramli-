@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ʿIlm al-Raml — HILM RAMLI</title>
+<style>
+:root{--bg:#0d1117;--card:#151c25;--gold:#d8b56a;--text:#f4efe4;--muted:#aeb6c2;--line:#2a3543}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172332,#0d1117 55%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{padding:24px 18px;text-align:center;border-bottom:1px solid var(--line);background:#0b1016cc;backdrop-filter:blur(8px)}
+h1{margin:0;color:var(--gold);font-size:28px}header p{margin:6px 0 0;color:var(--muted)}
+nav{display:flex;gap:8px;overflow:auto;padding:10px;position:sticky;top:0;background:#0d1117ee;z-index:2}
+button,.tab{border:1px solid var(--line);background:var(--card);color:var(--text);padding:11px 14px;border-radius:12px;cursor:pointer}
+button.primary{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}
+main{max-width:1100px;margin:auto;padding:16px}.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.card{background:#121923;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 30px #0003}
+textarea,input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0c1219;color:var(--text)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.muted{color:var(--muted)}.gold{color:var(--gold)}
+.figure{font-size:42px;line-height:1.05;letter-spacing:3px;text-align:center;color:var(--gold);direction:ltr}
+.tableau{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cell{background:#0d141c;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.cell strong{display:block;color:var(--gold)}
+@media(max-width:650px){.tableau{grid-template-columns:repeat(2,1fr)}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header><h1>✦ ʿIlm al-Raml ✦</h1><p>HILM RAMLI — étude et calcul traditionnel</p></header>
+<nav>
+<button class="tab" data-page="home">Accueil</button><button class="tab" data-page="consult">Consultation</button>
+<button class="tab" data-page="ency">Encyclopédie</button><button class="tab" data-page="history">Historique</button>
+</nav>
+<main>
+<section id="home" class="page active">
+<div class="card"><h2>Bienvenue</h2><p class="muted">Application d'étude du ʿIlm al-Raml. Cette première version calcule automatiquement un tableau à partir de quatre figures mères et présente les principales maisons.</p>
+<div class="actions"><button class="primary" onclick="show('consult')">Nouvelle consultation</button><button onclick="show('ency')">Explorer les figures</button></div></div>
+<div class="grid" style="margin-top:14px">
+<div class="card"><h3>16 figures</h3><p class="muted">Base structurée des figures traditionnelles.</p></div>
+<div class="card"><h3>Tableau</h3><p class="muted">Mères, Filles, Nièces, Témoins et Juge.</p></div>
+<div class="card"><h3>Hors ligne</h3><p class="muted">Les données de base sont intégrées à l'application.</p></div>
+</div>
+</section>
+
+<section id="consult" class="page">
+<div class="card"><h2>🔮 Nouvelle consultation</h2>
+<label>Question ou intention</label><textarea id="question" rows="3" placeholder="Ex. Quelle est la tendance de mon projet ?"></textarea>
+<p class="muted">Choisissez quatre figures mères. Pour une consultation aléatoire, utilisez le bouton automatique.</p>
+<div class="actions"><button class="primary" onclick="randomConsult()">Générer automatiquement</button><button onclick="saveConsult()">Enregistrer</button><button onclick="window.print()">Imprimer / PDF</button></div>
+</div>
+<div id="result" style="margin-top:14px"></div>
+</section>
+
+<section id="ency" class="page">
+<div class="card"><h2>📖 Encyclopédie</h2><p class="muted">16 figures de base et leurs descriptions synthétiques. Les significations détaillées pourront être enrichies dans les prochaines versions.</p>
+<div id="figures" class="grid"></div></div>
+<div class="card" style="margin-top:14px"><h2>🏛️ Les 16 maisons</h2><div id="houses" class="grid"></div></div>
+</section>
+
+<section id="history" class="page">
+<div class="card"><h2>📜 Historique</h2><div id="historyList" class="muted">Aucune consultation enregistrée.</div><div class="actions"><button onclick="clearHistory()">Effacer l'historique</button></div></div>
+</section>
+</main>
+<script>
+const figures=[
+["Via","•• •• •• ••","Chemin, mouvement, ouverture"],
+["Populus","•• •• •• ••","Collectif, multitude, neutralité"],
+["Fortuna Major","•• •• •• •","Stabilité, réussite durable"],
+["Fortuna Minor","• •• •• ••","Succès temporaire, action"],
+["Albus","• • •• •","Clarté, savoir, paix"],
+["Rubeus","•• •• • ••","Intensité, passion, agitation"],
+["Puella","•• • •• •","Harmonie, beauté, relation"],
+["Puer","• •• • •","Énergie, conflit, initiative"],
+["Conjunctio","• • •• ••","Union, rencontre, connexion"],
+["Carcer","•• • •• ••","Limite, retenue, structure"],
+["Tristitia","•• •• • •","Gravité, profondeur, patience"],
+["Laetitia","• •• • ••","Joie, élévation, optimisme"],
+["Caput Draconis","• • • ••","Commencement, entrée, origine"],
+["Cauda Draconis","•• • • •","Fin, sortie, transformation"],
+["Acquisitio","• • •• ••","Gain, acquisition, expansion"],
+["Amissio","•• • • ••","Perte, détachement, dépense"]
+];
+const houses=["Soi / consultant","Biens et ressources","Communication et proches","Famille et fondations","Joie, créativité, enfants","Travail et contraintes","Partenaire / opposition","Transformations et pertes","Savoir, voyages, spiritualité","Autorité, carrière, accomplissement","Amis, soutiens, espérances","Épreuves et retraits","Témoin I / influence","Témoin II / influence","Juge / synthèse","Maison supplémentaire selon méthode"];
+const bitNames=["•","••"]; // • = impair, •• = pair
+
+function parity(){return Math.random()<.5?1:2}
+function makeFigure(){return [parity(),parity(),parity(),parity()]}
+function add(a,b){return a.map((v,i)=>v===b[i]?2:1)} // 2 if same parity, 1 if different
+function transpose(m){return [0,1,2,3].map(c=>[0,1,2,3].map(r=>m[r][c]))}
+function figStr(f){return f.map(x=>x===1?"•":"••").join("<br>")}
+function figureName(f){
+ let key=f.join(""); return figures.find(x=>x[1].replaceAll(" ","").split("").map(c=>c==="•"?1:2).join("")===key)?.[0] || "Figure";
+}
+function build(){
+ const mothers=[makeFigure(),makeFigure(),makeFigure(),makeFigure()];
+ const daughters=transpose(mothers);
+ const nieces=[add(mothers[0],mothers[1]),add(mothers[2],mothers[3]),add(daughters[0],daughters[1]),add(daughters[2],daughters[3])];
+ const witnesses=[add(nieces[0],nieces[1]),add(nieces[2],nieces[3])];
+ const judge=add(witnesses[0],witnesses[1]);
+ return {mothers,daughters,nieces,witnesses,judge}
+}
+function show(id){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");window.scrollTo(0,0)}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>show(b.dataset.page));
+function card(label,f,i){return `<div class="cell"><strong>${label}${i!==undefined?" "+(i+1):""}</strong><div class="figure">${figStr(f)}</div><div>${figureName(f)}</div></div>`}
+function randomConsult(){
+ const t=build(), q=document.getElementById("question").value.trim()||"Consultation sans question";
+ let all=[...t.mothers,...t.daughters,...t.nieces,...t.witnesses,t.judge];
+ document.getElementById("result").innerHTML=`<div class="card"><h2>Tableau de Raml</h2><p class="muted">${escapeHtml(q)}</p>
+ <h3>Mères</h3><div class="tableau">${t.mothers.map((f,i)=>card("Mère",f,i)).join("")}</div>
+ <h3>Filles</h3><div class="tableau">${t.daughters.map((f,i)=>card("Fille",f,i)).join("")}</div>
+ <h3>Nièces</h3><div class="tableau">${t.nieces.map((f,i)=>card("Nièce",f,i)).join("")}</div>
+ <h3>Témoins</h3><div class="tableau">${t.witnesses.map((f,i)=>card("Témoin",f,i)).join("")}</div>
+ <h3>Juge</h3><div class="tableau">${card("Juge",t.judge)}</div>
+ <h3>Maisons</h3><div class="grid">${all.slice(0,16).map((f,i)=>`<div class="cell"><strong>Maison ${i+1}</strong><div class="figure">${figStr(f)}</div><div>${figureName(f)}<br><span class="muted">${houses[i]}</span></div></div>`).join("")}</div>
+ <p class="muted">Interprétation automatique : cette version fournit une lecture descriptive des figures et maisons. Elle ne constitue pas une certitude ni un avis religieux, médical, juridique ou financier.</p></div>`;
+ window.current={q,t,all,date:new Date().toISOString()};
+}
+function saveConsult(){if(!window.current){randomConsult()}let h=JSON.parse(localStorage.getItem("ramlHistory")||"[]");h.unshift(window.current);localStorage.setItem("ramlHistory",JSON.stringify(h.slice(0,50)));renderHistory();alert("Consultation enregistrée.");}
+function renderHistory(){let h=JSON.parse(localStorage.getItem("ramlHistory")||"[]");document.getElementById("historyList").innerHTML=h.length?h.map((x,i)=>`<div class="card" style="margin:8px 0"><b>${new Date(x.date).toLocaleString()}</b><p>${escapeHtml(x.q)}</p><button onclick="viewHistory(${i})">Afficher</button></div>`).join(""):"Aucune consultation enregistrée."}
+function viewHistory(i){let h=JSON.parse(localStorage.getItem("ramlHistory")||"[]");let x=h[i];window.current=x;show("consult");document.getElementById("question").value=x.q;document.getElementById("result").innerHTML="<div class='card'><h3>Consultation sauvegardée</h3><p>Utilisez l'historique pour conserver vos notes. Pour reconstruire l'affichage complet, relancez une consultation.</p></div>"}
+function clearHistory(){localStorage.removeItem("ramlHistory");renderHistory()}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+document.getElementById("figures").innerHTML=figures.map((f,i)=>`<div class="cell"><strong>${i+1}. ${f[0]}</strong><div class="figure">${f[1]}</div><p>${f[2]}</p></div>`).join("");
+document.getElementById("houses").innerHTML=houses.map((h,i)=>`<div class="card"><b>Maison ${i+1}</b><p class="muted">${h}</p></div>`).join("");
+renderHistory();
+</script>
+</body></html>
